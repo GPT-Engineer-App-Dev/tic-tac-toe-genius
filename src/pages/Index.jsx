@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Button, Flex, Grid, Text } from '@chakra-ui/react';
 
 const Index = () => {
@@ -18,15 +18,15 @@ const Index = () => {
   };
 
   const [board, setBoard] = useState(Array(9).fill(null));
-  const [isXNext, setIsXNext] = useState(true);
+  const [isXNext, setIsXNext] = useState(true); // Ensure user always starts the game
   const winner = calculateWinner(board);
 
   const handleClick = (index) => {
-    if (board[index] || winner) return;
+    if (board[index] || winner || !isXNext) return;
     const newBoard = [...board];
-    newBoard[index] = isXNext ? 'X' : 'O';
+    newBoard[index] = 'X';
     setBoard(newBoard);
-    setIsXNext(!isXNext);
+    setIsXNext(false);
   };
 
   const renderSquare = (index) => (
@@ -34,6 +34,21 @@ const Index = () => {
       {board[index]}
     </Button>
   );
+
+  const aiMove = () => {
+    const emptyIndices = board.map((value, index) => value === null ? index : null).filter(v => v !== null);
+    if (emptyIndices.length === 0 || winner) return;
+    const randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+    const newBoard = [...board];
+    newBoard[randomIndex] = 'O';
+    setBoard(newBoard);
+  };
+
+  useEffect(() => {
+    if (!isXNext) {
+      setTimeout(aiMove, 500); // Delay AI move for better UX
+    }
+  }, [isXNext]);
 
   return (
     <Flex direction="column" align="center" justify="center" h="100vh">
